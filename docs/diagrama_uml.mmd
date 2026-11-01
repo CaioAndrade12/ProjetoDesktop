@@ -1,0 +1,149 @@
+---
+title: Agenda Clínica - Diagrama de classes (modelos)
+config:
+  layout: elk
+---
+classDiagram
+    direction TB
+
+    class Pessoa {
+        <<abstract>>
+        +id: int
+        -nome: str
+        #contato: Contato
+        +atualizar(nome, telefone, email)
+        +para_dict() dict
+        +descricao() str*
+    }
+    class Contato {
+        -telefone: str
+        -email: str
+        +telefone_formatado() str
+    }
+    class Cliente {
+        -cpf: str
+        +cpf_valido(cpf) bool$
+        +descricao() str
+    }
+    class Profissional {
+        -especialidade: str
+        +descricao() str
+    }
+
+    class Servico {
+        <<abstract>>
+        +TIPO: str
+        -nome: str
+        -preco_base: float
+        -duracao_min: int
+        +calcular_valor() float*
+        +criar(tipo, nome, preco, duracao) Servico$
+    }
+    class Consulta {
+        +calcular_valor() float
+    }
+    class Exame {
+        -taxa_material: float
+        +calcular_valor() float
+    }
+    class Retorno {
+        +DESCONTO: float
+        +calcular_valor() float
+    }
+
+    class StatusAgendamento {
+        <<enumeration>>
+        AGENDADO
+        CONFIRMADO
+        CONCLUIDO
+        CANCELADO
+    }
+    class Agendamento {
+        -id: int
+        -data_hora: datetime
+        -status: StatusAgendamento
+        +valor() float
+        +confirmar()
+        +concluir()
+        +cancelar()
+        +remarcar(nova_data_hora)
+        +#95;#95;lt#95;#95;(outro) bool
+    }
+    class Agenda {
+        +ABERTURA: time
+        +FECHAMENTO: time
+        -agendamentos: dict
+        +agendar(cliente, profissional, servico, data_hora) Agendamento
+        +remarcar(id, nova_data_hora) Agendamento
+        +horarios_livres(profissional, servico, dia) list
+        +listar(filtros) list
+    }
+    class Clinica {
+        +nome: str
+        -agenda: Agenda
+        -clientes: dict
+        -profissionais: dict
+        -servicos: dict
+        -banco: BancoDeDados
+        +cadastrar_cliente(cliente) Cliente
+        +agendar(id_cliente, id_profissional, id_servico, data_hora) Agendamento
+        +confirmar_agendamento(id)
+        +cancelar_agendamento(id)
+        +notificar(agendamento, notificador) str
+    }
+
+    class Notificador {
+        <<abstract>>
+        -historico: list
+        +enviar(agendamento) str*
+    }
+    class NotificadorWhatsApp {
+        +enviar(agendamento) str
+    }
+    class NotificadorEmail {
+        +enviar(agendamento) str
+    }
+    class Relatorio {
+        +titulo: str
+        +total_por_status(agenda) dict
+        +faturamento_realizado(agenda) float
+        +gerar_texto(agenda) str
+    }
+    class BancoDeDados {
+        -conexao: sqlite3.Connection
+        +salvar(objeto)
+        +excluir(objeto)
+        +carregar_clientes() list
+        +carregar_agendamentos() list
+    }
+
+    %% HERANÇA (seta com triângulo vazio)
+    Pessoa <|-- Cliente : herança
+    Pessoa <|-- Profissional : herança
+    Servico <|-- Consulta : herança
+    Servico <|-- Exame : herança
+    Servico <|-- Retorno : herança
+    Notificador <|-- NotificadorWhatsApp : herança
+    Notificador <|-- NotificadorEmail : herança
+
+    %% COMPOSIÇÃO (losango cheio)
+    Pessoa "1" *-- "1" Contato : composição
+    Clinica "1" *-- "1" Agenda : composição
+    Agenda "1" *-- "0..*" Agendamento : composição
+
+    %% AGREGAÇÃO (losango vazio) - um tipo de associação
+    Clinica "1" o-- "0..*" Cliente : agregação
+    Clinica "1" o-- "0..*" Profissional : agregação
+    Clinica "1" o-- "0..*" Servico : agregação
+
+    %% ASSOCIAÇÃO (seta contínua)
+    Agendamento "0..*" --> "1" Cliente : associação
+    Agendamento "0..*" --> "1" Profissional : associação
+    Agendamento "0..*" --> "1" Servico : associação
+    Agendamento --> StatusAgendamento : associação
+    Clinica --> BancoDeDados : associação
+
+    %% DEPENDÊNCIA (seta tracejada)
+    Clinica ..> Notificador : dependência
+    Notificador ..> Agendamento : dependência
+    Relatorio ..> Agenda : dependência

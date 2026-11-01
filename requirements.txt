@@ -1,0 +1,2 @@
+# Nenhuma dependência externa.
+# O projeto usa só a biblioteca padrão do Python 3.8+: tkinter, sqlite3, unittest, abc, enum e datetime.

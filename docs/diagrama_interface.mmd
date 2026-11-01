@@ -1,0 +1,81 @@
+---
+title: Agenda Clínica - Interface e exceções
+config:
+  layout: elk
+---
+classDiagram
+    direction TB
+
+    class tk_Tk["tk.Tk"]
+    class tk_Toplevel["tk.Toplevel"]
+    class ttk_Frame["ttk.Frame"]
+    class Exception
+
+    class JanelaPrincipal {
+        +clinica: Clinica
+        +atualizar_tudo(mensagem)
+        +abrir_agendamento(agendamento)
+    }
+    class JanelaAgendamento {
+        +salvar() Agendamento
+    }
+    class AbaCadastro {
+        <<abstract>>
+        +atualizar()
+        #_listar(termo) list*
+        #_criar(dados)*
+        #_editar(id, dados)*
+        #_remover(id)*
+    }
+    class AbaClientes
+    class AbaProfissionais
+    class AbaServicos
+    class AbaAgenda {
+        +dia: date
+        +atualizar()
+    }
+    class AbaRelatorios {
+        +atualizar()
+    }
+    class Tabela {
+        +preencher(linhas)
+        +selecionado() int
+    }
+    class Tema {
+        +PRIMARIA: str
+        +aplicar(raiz)$
+    }
+    class MenuTerminal {
+        +executar()
+    }
+    class Clinica
+
+    class AgendaErro
+    class DadoInvalidoErro
+    class RegistroNaoEncontradoErro
+    class HorarioIndisponivelErro
+    class OperacaoInvalidaErro
+
+    tk_Tk <|-- JanelaPrincipal : herança
+    tk_Toplevel <|-- JanelaAgendamento : herança
+    ttk_Frame <|-- AbaCadastro : herança
+    ttk_Frame <|-- AbaAgenda : herança
+    ttk_Frame <|-- AbaRelatorios : herança
+    ttk_Frame <|-- Tabela : herança
+    AbaCadastro <|-- AbaClientes : herança
+    AbaCadastro <|-- AbaProfissionais : herança
+    AbaCadastro <|-- AbaServicos : herança
+
+    JanelaPrincipal "1" *-- "5" ttk_Frame : composição (abas)
+    AbaCadastro *-- Tabela : composição
+    AbaAgenda *-- Tabela : composição
+    JanelaPrincipal --> Clinica : associação
+    MenuTerminal --> Clinica : associação
+    JanelaPrincipal ..> JanelaAgendamento : dependência (cria)
+    JanelaPrincipal ..> Tema : dependência (usa)
+
+    Exception <|-- AgendaErro : herança
+    AgendaErro <|-- DadoInvalidoErro
+    AgendaErro <|-- RegistroNaoEncontradoErro
+    AgendaErro <|-- HorarioIndisponivelErro
+    AgendaErro <|-- OperacaoInvalidaErro

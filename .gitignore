@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+
+# Banco de dados gerado ao rodar o programa
+agenda.db
+agenda.db-journal
+
+# Relatórios exportados
+relatorio_*.txt
+
+# Ambientes e editores
+.venv/
+venv/
+.vscode/
+.idea/
